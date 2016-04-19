@@ -18,8 +18,8 @@ int main(int argc, char **argv) {
                "Options:\n"
                "    -w, --width        Image width; default is 1200\n"
                "    -h, --height       Image height; default is 800\n"
-               "    -c, --zoom-origin  Zoom origin; default is -0.5,0\n"
-               "    -z, --zoom         Zoom percentage; default is 100\n"
+               "    -x, --x-range      Range to map pixels to; default is -2,1\n"
+               "    -y, --y-range      Range to map pixels to; default is -1,1\n"
                "    -i, --iterations   Number of iterations to check; default is 1000\n"
                "\n"
                "When output-file is -, output to stdout\n", argv[0]);
@@ -30,16 +30,23 @@ int main(int argc, char **argv) {
     int image_width = 1200;
     int image_height = 800;
     long iterations = 1000;
-    double centerx = -0.5;
-    double centery = 0;
+    double xmin = -2;
+    double xmax = 1;
+    double ymin = -1;
+    double ymax = 1;
 
     bool ddash = false; /* the double dash "--" */
     int i;
     for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--") == 0) {
-            ddash = true;
+            if (!ddash)
+                ddash = true;
+            else
+                output_filename = "--";
+
         } else if (argv[i][0] == '-' && argv[i][1] == 0) {
             output_filename = argv[i];
+
         } else if (argv[i][0] == '-' && !ddash) {
 
 #define options(x,y) if (strcmp(argv[i], x) == 0 || strcmp(argv[i], y) == 0)
@@ -57,6 +64,20 @@ int main(int argc, char **argv) {
             } else options("-i", "--iterations") {
                 param_chk();
                 sscanf(argv[++i], "%ld", &iterations);
+
+            } else options("-x", "--x-range") {
+                param_chk();
+                if (sscanf(argv[++i], "%lf,%lf", &xmin, &xmax) < 2) {
+                    fprintf(stderr, "Bad format for parameter '%s'\n", argv[i-1]);
+                    return 1;
+                }
+
+            } else options("-y", "--y-range") {
+                param_chk();
+                if (sscanf(argv[++i], "%lf,%lf", &ymin, &ymax) < 2) {
+                    fprintf(stderr, "Bad format for parameter '%s\n", argv[i-1]);
+                    return 1;
+                }
 
             } else {
                 printf("Unrecognized option '%s'\n", argv[i]);
@@ -89,7 +110,7 @@ int main(int argc, char **argv) {
     }
 
     struct rgb *image = malloc(image_width * image_height * sizeof(struct rgb));
-    generate(image, image_width, image_height, centerx, centery, iterations);
+    generate(image, image_width, image_height, xmin, xmax, ymin, ymax, iterations);
 
     output_image(output_file, image, image_width, image_height);
 
