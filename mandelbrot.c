@@ -18,28 +18,28 @@ static long in_mandelbrot_set(double complex c, long iterations) {
 
 static struct rgb color(long i, long iterations) {
     struct rgb r;
-    i %= 15;
-    if (i < 5) {
-        double norm = (double) i / 5.0;
-        r.r = norm * 0xff;
-        r.g = norm * 0x00;
-        r.b = norm * 0x00;
-
-    } else if (i < 10) {
-        i -= 5;
-
-        double norm = (1 - (double) i / 5.0);
+    i %= 500;
+    if (i < 30) {
+        double norm = (double) i / 50.0;
         r.r = norm * 0x00;
         r.g = norm * 0x00;
-        r.b = norm * 0xff;
+        r.b = norm * 0x55;
+
+    } else if (i < 200) {
+        i -= 30;
+
+        double norm = (1 - (double) i / 170.0);
+        r.r = norm * 0x88;
+        r.g = norm * 0x55;
+        r.b = norm * 0x55 + 0x55;
 
     } else {
-        i -= 10;
+        i -= 200;
 
-        double norm = (1 - (double) i / 5.0);
-        r.r = norm * 0x00;
-        r.g = norm * 0xff;
-        r.b = norm * 0x00;
+        double norm = (1 - (double) i / 200.0);
+        r.r = (1-norm) * 0x88;
+        r.g = (1-norm) * 0x55;
+        r.b = (1-norm) * 0xaa;
     }
 
     return r;
@@ -48,9 +48,9 @@ static struct rgb color(long i, long iterations) {
 void generate(struct rgb *image, int image_width, int image_height,
               double xmin, double xmax, double ymin, double ymax, long iterations) {
 
-    int x, y;
-    for (y = 0; y < image_height; y++) {
-        for (x = 0; x < image_width; x++) {
+#pragma omp parallel for
+    for (int y = 0; y < image_height; y++) {
+        for (int x = 0; x < image_width; x++) {
 
             /* map pixels to complex numbers according to given ranges then test if they're in the set */
             //long i = in_mandelbrot_set(((double) x / (double) image_width * 3.0 - 2.0) + ((double) y / (double) image_height - 0.5) * 2.0 * I, iterations);
