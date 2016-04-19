@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <complex.h>
@@ -45,19 +47,22 @@ static struct rgb color(double i, long iterations) {
     return r;
 }
 
-void generate(struct rgb *image, int image_width, int image_height, double xmin,
-              double xmax, double ymin, double ymax, long escape_radius, long iterations) {
+void generate(FILE *output_file, int image_width, int image_height, double xmin, double xmax,
+              double ymin, double ymax, long escape_radius, long iterations) {
 
-#pragma omp parallel for
+    struct rgb *line = malloc(image_width * sizeof(struct rgb));
     for (int y = 0; y < image_height; y++) {
+
+        #pragma omp parallel for
         for (int x = 0; x < image_width; x++) {
 
             /* map pixels to complex numbers according to given ranges then test if they're in the set */
             double i = in_mandelbrot_set((double) x / (double) image_width * (xmax - xmin) + xmin  +
                     I * ((1 - (double) y / (double) image_height) * (ymax - ymin) + ymin), iterations, escape_radius);
 
-            long index = y*image_width+x;
-            image[index] = color(i, iterations);
+            line[x] = color(i, iterations);
         }
+        fwrite(line, 3, image_width, output_file);
     }
+    free(line);
 }

@@ -6,9 +6,8 @@
 #include "errnomsg.h"
 #include "mandelbrot.h"
 
-void output_image(FILE *output_file, struct rgb* image, int image_width, int image_height) {
+void output_image_header(FILE *output_file, int image_width, int image_height) {
     fprintf(output_file, "P6 %d %d 255 ", image_width, image_height);
-    fwrite(image, image_height, image_width * sizeof(struct rgb), output_file);
 }
 
 int main(int argc, char **argv) {
@@ -172,12 +171,9 @@ int main(int argc, char **argv) {
         }
     }
 
-    struct rgb *image = malloc(image_width * image_height * sizeof(struct rgb));
-    generate(image, image_width, image_height, xmin, xmax, ymin, ymax, 256, iterations);
+    output_image_header(output_file, image_width, image_height);
 
-    output_image(output_file, image, image_width, image_height);
-
-    free(image);
+    generate(output_file, image_width, image_height, xmin, xmax, ymin, ymax, 256, iterations);
 
     return 0;
 }
