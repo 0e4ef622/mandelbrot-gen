@@ -177,5 +177,7 @@ int main(int argc, char **argv) {
 
     output_image(output_file, image, image_width, image_height);
 
+    free(image);
+
     return 0;
 }
