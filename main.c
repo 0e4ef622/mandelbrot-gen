@@ -21,6 +21,10 @@ int main(int argc, char **argv) {
                "    -x, --x-range      Range to map pixels to; default is -2,1\n"
                "    -y, --y-range      Range to map pixels to; default is -1,1\n"
                "    -i, --iterations   Number of iterations to check; default is 1000\n"
+               "    -c, --center       When a center is specified, the x and y ranges\n"
+               "                       will become relative to the center. If only one\n"
+               "                       range is specified, the other will be adjusted to\n"
+               "                       match the aspect ratio of the image.\n"
                "\n"
                "When output-file is -, output to stdout\n", argv[0]);
         exit(0);
@@ -30,12 +34,15 @@ int main(int argc, char **argv) {
     int image_width = 1200;
     int image_height = 800;
     long iterations = 1000;
-    double xmin = -2;
-    double xmax = 1;
-    double ymin = -1;
-    double ymax = 1;
+    double xmin = 0;
+    double xmax = 0;
+    double ymin = 0;
+    double ymax = 0;
+    double centerx = 0;
+    double centery = 0;
 
     bool ddash = false; /* the double dash "--" */
+    bool center = false;
     int i;
     for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--") == 0) {
@@ -70,6 +77,9 @@ int main(int argc, char **argv) {
                 if (sscanf(argv[++i], "%lf,%lf", &xmin, &xmax) < 2) {
                     fprintf(stderr, "Bad format for parameter '%s'\n", argv[i-1]);
                     return 1;
+                } else if (xmin == xmax) {
+                    fprintf(stderr, "Invalid range for parameter '%s'\n", argv[i-1]);
+                    return 1;
                 }
 
             } else options("-y", "--y-range") {
@@ -77,7 +87,18 @@ int main(int argc, char **argv) {
                 if (sscanf(argv[++i], "%lf,%lf", &ymin, &ymax) < 2) {
                     fprintf(stderr, "Bad format for parameter '%s\n", argv[i-1]);
                     return 1;
+                } else if (ymin == ymax) {
+                    fprintf(stderr, "Invalid range for parameter '%s'\n", argv[i-1]);
+                    return 1;
                 }
+
+            } else options("-c", "--center") {
+                param_chk();
+                if (sscanf(argv[++i], "%lf,%lf", &centerx, &centery) < 2) {
+                    fprintf(stderr, "Bad format for parameter '%s\n", argv[i-1]);
+                    return 1;
+                }
+                center = true;
 
             } else {
                 printf("Unrecognized option '%s'\n", argv[i]);
@@ -97,6 +118,48 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    if (center) {
+        if ((xmin || xmax) && !(ymin || ymax)) {
+            /* auto adjust y range according to image size */
+            double y = (double) image_height / (double) image_width * (xmax - xmin);
+
+            xmin += centerx;
+            xmax += centerx;
+
+            ymin = centery - y / 2;
+            ymax = centery + y / 2;
+
+        } else if ((ymin || ymax) && !(xmin || xmax)) {
+            double x = (double) image_width / (double) image_height * (ymax - ymin);
+
+            ymin += centery;
+            ymax += centery;
+
+            xmin = centerx - x / 2;
+            xmax = centerx + x / 2;
+            /* auto adjust x range according to image size */
+        } else if ((ymin || ymax) && (xmin || xmax)) {
+            fprintf(stderr, "Only specify one range when using '-c' or '--center'\n");
+            return 1;
+        } else {
+            fprintf(stderr, "No range specified, ignoring '--center' option\n");
+            ymin = -1;
+            ymax = 1;
+            xmin = -2;
+            xmax = 1;
+        }
+    } else {
+        if (!(xmin || xmax)) {
+            xmin = -2;
+            xmax = 1;
+        }
+
+        if (!(ymin || ymax)) {
+            ymin = -1;
+            ymax = 1;
+        }
+    }
+
     FILE *output_file;
 
     if (output_filename[0] == '-' && output_filename[1] == 0) {
@@ -110,7 +173,7 @@ int main(int argc, char **argv) {
     }
 
     struct rgb *image = malloc(image_width * image_height * sizeof(struct rgb));
-    generate(image, image_width, image_height, xmin, xmax, ymin, ymax, iterations);
+    generate(image, image_width, image_height, xmin, xmax, ymin, ymax, 256, iterations);
 
     output_image(output_file, image, image_width, image_height);
 
