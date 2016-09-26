@@ -18,7 +18,7 @@ static double in_mandelbrot_set(double complex c, long iterations, long escape_r
     return 0;
 }
 
-static struct rgb color(double i, long iterations) {
+static struct rgb color(double i) {
     struct rgb r;
     i = fmod(i, 100.0);
     if (i < 30) {
@@ -60,7 +60,7 @@ void generate(FILE *output_file, int image_width, int image_height, double xmin,
             double i = in_mandelbrot_set((double) x / (double) image_width * (xmax - xmin) + xmin  +
                     I * ((1 - (double) y / (double) image_height) * (ymax - ymin) + ymin), iterations, escape_radius);
 
-            line[x] = color(i, iterations);
+            line[x] = color(i);
         }
         fwrite(line, 3, image_width, output_file);
     }
