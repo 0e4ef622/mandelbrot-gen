@@ -58,7 +58,6 @@ int main(int argc, char **argv) {
 #define options(x,y) if (strcmp(argv[i], x) == 0 || strcmp(argv[i], y) == 0)
 #define param_chk() if (i+1 == argc) { printf("Missing parameter for '%s'\n", argv[i]); exit(1); }
 
-            /* TODO --zoom and --zoom-origin */
             options("-w", "--width") {
                 param_chk();
                 sscanf(argv[++i], "%d", &image_width);
