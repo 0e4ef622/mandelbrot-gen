@@ -128,6 +128,7 @@ int main(int argc, char **argv) {
             ymax = centery + y / 2;
 
         } else if ((ymin || ymax) && !(xmin || xmax)) {
+            /* auto adjust x range according to image size */
             double x = (double) image_width / (double) image_height * (ymax - ymin);
 
             ymin += centery;
@@ -135,7 +136,6 @@ int main(int argc, char **argv) {
 
             xmin = centerx - x / 2;
             xmax = centerx + x / 2;
-            /* auto adjust x range according to image size */
         } else if ((ymin || ymax) && (xmin || xmax)) {
             fprintf(stderr, "Only specify one range when using '-c' or '--center'\n");
             return 1;
