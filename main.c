@@ -20,12 +20,18 @@ int main(int argc, char **argv) {
                "    -x, --x-range      Range to map pixels to; default is -2,1\n"
                "    -y, --y-range      Range to map pixels to; default is -1,1\n"
                "    -i, --iterations   Number of iterations to check; default is 1000\n"
-               "    -c, --center       When a center is specified, the x and y ranges\n"
-               "                       will become relative to the center. If only one\n"
-               "                       range is specified, the other will be adjusted to\n"
-               "                       match the aspect ratio of the image.\n"
+               "    -c, --center       Specify a center.\n"
                "\n"
-               "When output-file is -, output to stdout\n", argv[0]);
+               "When a center is specified, the x and y ranges\n"
+               "will become relative to the center. If only one\n"
+               "range is specified, the other will be adjusted to\n"
+               "match the aspect ratio of the image.\n"
+               "\n"
+               "Example usage: ./mandelbrot-gen --center -.745,.13 -x -.008,.008 -w 5464 -h 3072 out.ppm\n"
+               "Another example identical to the former: ./mandelbrot-gen -x -.753,-.737 -y .12550219619326503,0.13449780380673498 -w 5464 -h 3072 out.ppm\n"
+               "No space is allowed before nor after the comma\n"
+               "\n"
+               "When output-file is -, output is to stdout\n", argv[0]);
         exit(0);
     }
 
