@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
                "match the aspect ratio of the image.\n"
                "\n"
                "Example usage: ./mandelbrot-gen --center -.745,.13 -x -.008,.008 -w 5464 -h 3072 out.ppm\n"
-               "Another example identical to the former: ./mandelbrot-gen -x -.753,-.737 -y .12550219619326503,0.13449780380673498 -w 5464 -h 3072 out.ppm\n"
+               "Another example identical to the former: ./mandelbrot-gen -x -.753,-.737 -y .12550219619326503,.13449780380673498 -w 5464 -h 3072 out.ppm\n"
                "No space is allowed before nor after the comma\n"
                "\n"
                "When output-file is -, output is to stdout\n", argv[0]);
