@@ -5,7 +5,8 @@
 #include <complex.h>
 #include "types.h"
 
-static double in_mandelbrot_set(double complex c, long iterations, long escape_radius) {
+static double in_mandelbrot_set(double complex c,
+                        long iterations, long escape_radius) {
     long i;
     double complex z = 0;
     for (i = 0; i < iterations; i++) {
@@ -47,8 +48,9 @@ static struct rgb color(double i) {
     return r;
 }
 
-void generate(FILE *output_file, int image_width, int image_height, double xmin, double xmax,
-              double ymin, double ymax, long escape_radius, long iterations) {
+void generate(FILE *output_file, int image_width, int image_height,
+            double xmin, double xmax, double ymin, double ymax,
+            long escape_radius, long iterations) {
 
     struct rgb *line = malloc(image_width * sizeof(struct rgb));
     for (int y = 0; y < image_height; y++) {
@@ -56,10 +58,12 @@ void generate(FILE *output_file, int image_width, int image_height, double xmin,
         #pragma omp parallel for
         for (int x = 0; x < image_width; x++) {
 
-            /* map pixels to complex numbers according to given ranges then test if they're in the set */
-            double i = in_mandelbrot_set((double) x / (double) image_width * (xmax - xmin) + xmin  +
-                    I * ((1 - (double) y / (double) image_height) * (ymax - ymin) + ymin), iterations, escape_radius);
-
+            /* map pixels to complex numbers according to given ranges then test
+               if they're in the set */
+            double real = (double)x/(double)image_width * (xmax-xmin) + xmin;
+            double imag = (1-(double)y/(double)image_height) * (ymax-ymin) + ymin;
+            double i = in_mandelbrot_set(real + I*imag, iterations,
+                                                             escape_radius);
             line[x] = color(i);
         }
         fwrite(line, 3, image_width, output_file);
